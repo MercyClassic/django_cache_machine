@@ -1,0 +1,26 @@
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:15-alpine
+    restart: always
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -d postgres' || exit 1" ]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+      start_period: 1s
+  cache_machine:
+    container_name: cache_machine
+    restart: always
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - ./src/media:/app/src/media
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
